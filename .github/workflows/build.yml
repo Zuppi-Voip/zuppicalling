@@ -1,0 +1,36 @@
+name: Build MicroSIP Executable
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v3
+
+    - name: Set up MSBuild
+      uses: microsoft/setup-msbuild@v1
+
+    - name: Install Dependencies
+      run: |
+        choco install mingw
+        choco install cmake
+        choco install windows-sdk-10
+
+    - name: Build MicroSIP
+      run: |
+        mkdir build
+        cd build
+        cmake ..
+        cmake --build . --config Release
+
+    - name: Upload Executable
+      uses: actions/upload-artifact@v3
+      with:
+        name: MicroSIP-Rebranded-Executable
+        path: build/Release/MicroSIP.exe
