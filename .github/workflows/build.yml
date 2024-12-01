@@ -16,8 +16,8 @@ jobs:
     - name: Install MSYS2
       run: |
         choco install -y msys2
-        setx PATH "%PATH%;C:\tools\msys64\usr\bin;C:\tools\msys64\mingw64\bin"
-        refreshenv
+        echo "::add-path::C:\\tools\\msys64\\usr\\bin"
+        echo "::add-path::C:\\tools\\msys64\\mingw64\\bin"
 
     - name: Install Dependencies with pacman
       shell: bash
