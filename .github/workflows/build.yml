@@ -16,26 +16,20 @@ jobs:
     - name: Install MSYS2
       run: |
         choco install -y msys2
-        echo "Adding MSYS2 paths to environment variables."
         echo "C:\\tools\\msys64\\usr\\bin" >> $GITHUB_ENV
         echo "C:\\tools\\msys64\\mingw64\\bin" >> $GITHUB_ENV
         echo "C:\\tools\\msys64\\mingw32\\bin" >> $GITHUB_ENV
         echo "C:\\tools\\msys64\\ucrt64\\bin" >> $GITHUB_ENV
         echo "C:\\tools\\msys64\\clang64\\bin" >> $GITHUB_ENV
 
-    - name: Refresh PATH
-      shell: cmd
-      run: |
-        set PATH=C:\tools\msys64\usr\bin;C:\tools\msys64\mingw64\bin;C:\tools\msys64\mingw32\bin;C:\tools\msys64\ucrt64\bin;C:\tools\msys64\clang64\bin;%PATH%
-
     - name: Initialize MSYS2
       shell: bash
       run: |
-        echo "Starting MSYS2 initialization."
+        export PATH="/c/tools/msys64/usr/bin:/c/tools/msys64/mingw64/bin:/c/tools/msys64/mingw32/bin:$PATH"
         pacman --noconfirm -Syuu
         pacman --noconfirm -S base-devel mingw-w64-x86_64-toolchain
 
-    - name: Clone and Build PJSIP
+    - name: Build PJSIP
       shell: bash
       run: |
         git clone https://github.com/pjsip/pjproject.git
