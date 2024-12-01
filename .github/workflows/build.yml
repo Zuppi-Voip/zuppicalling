@@ -13,14 +13,15 @@ jobs:
     - name: Checkout Code
       uses: actions/checkout@v3
 
-    - name: Set Up MSBuild
-      uses: microsoft/setup-msbuild@v1
-
     - name: Install Dependencies
       run: |
         choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System'
         choco install mingw
-        choco install windows-sdk-10 --pre
+
+    - name: Download Windows SDK
+      run: |
+        Invoke-WebRequest -Uri https://go.microsoft.com/fwlink/?linkid=2120843 -OutFile windows-sdk-installer.exe
+        .\windows-sdk-installer.exe /quiet /norestart
 
     - name: Configure and Build
       run: |
