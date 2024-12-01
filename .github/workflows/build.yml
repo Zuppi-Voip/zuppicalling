@@ -19,17 +19,17 @@ jobs:
         refreshenv
 
     - name: Add MSYS2 to PATH
-      shell: bash
       run: |
-        echo "C:\\tools\\msys64\\usr\\bin" >> $GITHUB_PATH
-        echo "C:\\tools\\msys64\\mingw64\\bin" >> $GITHUB_PATH
-        echo "C:\\tools\\msys64\\mingw32\\bin" >> $GITHUB_PATH
+        echo "C:\\tools\\msys64\\usr\\bin" >> $GITHUB_ENV
+        echo "C:\\tools\\msys64\\mingw64\\bin" >> $GITHUB_ENV
+        echo "C:\\tools\\msys64\\mingw32\\bin" >> $GITHUB_ENV
+        echo "C:\\tools\\msys64\\ucrt64\\bin" >> $GITHUB_ENV
 
-    - name: Initialize MSYS2
+    - name: Initialize MSYS2 Environment
       shell: bash
       run: |
-        pacman -Syu --noconfirm
-        pacman -S --noconfirm base-devel mingw-w64-x86_64-toolchain
+        C:\\tools\\msys64\\usr\\bin\\bash -c "pacman --noconfirm -Syu"
+        C:\\tools\\msys64\\usr\\bin\\bash -c "pacman --noconfirm -S base-devel mingw-w64-x86_64-toolchain"
 
     - name: Clone and Build PJSIP
       shell: bash
