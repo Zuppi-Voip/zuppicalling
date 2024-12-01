@@ -7,28 +7,35 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
 
     steps:
     - name: Checkout Code
       uses: actions/checkout@v3
 
+    - name: Set Up CMake
+      uses: lukka/get-cmake@v3
+
     - name: Install Dependencies
       run: |
-        sudo apt-get update
-        sudo apt-get install -y build-essential cmake libssl-dev
-        # Install PJSIP
+        choco install -y visualstudio2022buildtools
+        choco install -y visualstudio2022-workload-vctools
+        choco install -y git cmake ninja
+
+    - name: Install PJSIP
+      run: |
         git clone https://github.com/pjsip/pjproject.git
         cd pjproject
-        ./configure
-        make
-        sudo make install
+        ./configure --enable-shared
+        cmake . -B build
+        cmake --build build --config Release
+        cmake --install build --prefix /pjsip/install
 
     - name: Build Project
       run: |
         mkdir build
         cd build
-        cmake ..
+        cmake -A x64 -DPJSIP_INCLUDE_DIR=/pjsip/install/include -DPJSIP_LIBRARY=/pjsip/install/lib .. 
         cmake --build . --config Release
 
     - name: Upload Executable
