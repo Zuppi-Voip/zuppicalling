@@ -29,8 +29,10 @@ target_link_libraries(ZuppiCalling
     ws2_32
     winmm
     mfc
-    ${CMAKE_BINARY_DIR}/pjproject/install/lib/libpjsua.a  # PJSIP static library
-    ${CMAKE_BINARY_DIR}/pjproject/install/lib/libpj.a    # Core PJSIP library
-    ${CMAKE_BINARY_DIR}/pjproject/install/lib/libpjlib-util.a
-    ${CMAKE_BINARY_DIR}/pjproject/install/lib/libpjnath.a
+    ${CMAKE_BINARY_DIR}/pjproject/install/lib/libpjsua-static.a  # PJSIP static library
+    ${CMAKE_BINARY_DIR}/pjproject/install/lib/libpjlib-util.a   # PJLIB utilities
+    ${CMAKE_BINARY_DIR}/pjproject/install/lib/libpj.a           # Core PJLIB
+    ${CMAKE_BINARY_DIR}/pjproject/install/lib/libpjnath.a       # NAT traversal library
+    ${CMAKE_BINARY_DIR}/pjproject/install/lib/libpjmedia.a      # Media stack
+    ${CMAKE_BINARY_DIR}/pjproject/install/lib/libpjsip.a        # SIP library
 )
