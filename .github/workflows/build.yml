@@ -13,23 +13,26 @@ jobs:
     - name: Checkout Code
       uses: actions/checkout@v3
 
-    - name: Install Dependencies
+    - name: Install MSYS2
       run: |
-        choco install -y cmake
-        choco install -y visualstudio2022buildtools
-        choco install -y visualstudio2022-workload-vctools
         choco install -y msys2
-        set PATH=C:\tools\msys64\usr\bin;C:\tools\msys64\mingw64\bin;%PATH%
-        C:\tools\msys64\usr\bin\bash -lc "pacman -S --noconfirm base-devel mingw-w64-x86_64-toolchain"
+        setx PATH "%PATH%;C:\tools\msys64\usr\bin;C:\tools\msys64\mingw64\bin"
+        refreshenv
+
+    - name: Install Dependencies with pacman
+      shell: bash
+      run: |
+        pacman -Syu --noconfirm
+        pacman -S --noconfirm base-devel mingw-w64-x86_64-toolchain
 
     - name: Install PJSIP
+      shell: bash
       run: |
-        C:\tools\msys64\usr\bin\bash -lc "
         git clone https://github.com/pjsip/pjproject.git &&
         cd pjproject &&
         ./configure --prefix=$(pwd)/install &&
         make &&
-        make install"
+        make install
 
     - name: Install JSON Library
       run: |
