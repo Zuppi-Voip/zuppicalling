@@ -17,6 +17,8 @@ include_directories(
     ${PROJECT_SOURCE_DIR}/lib
     ${PROJECT_SOURCE_DIR}/include
     ${PROJECT_SOURCE_DIR}
+    ${CMAKE_BINARY_DIR}/pjproject/install/include  # PJSIP headers
+    ${PROJECT_SOURCE_DIR}/lib/json                # JSON library
 )
 
 # Define macros
@@ -27,6 +29,8 @@ target_link_libraries(ZuppiCalling
     ws2_32
     winmm
     mfc
-    pjsua
-    pjlib
+    ${CMAKE_BINARY_DIR}/pjproject/install/lib/libpjsua.a  # PJSIP static library
+    ${CMAKE_BINARY_DIR}/pjproject/install/lib/libpj.a    # Core PJSIP library
+    ${CMAKE_BINARY_DIR}/pjproject/install/lib/libpjlib-util.a
+    ${CMAKE_BINARY_DIR}/pjproject/install/lib/libpjnath.a
 )
