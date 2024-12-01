@@ -1,45 +1,32 @@
-name: Build MicroSIP Executable
+cmake_minimum_required(VERSION 3.10)
 
-on:
-  push:
-    branches:
-      - main
+# Set the project name
+project(ZuppiCalling)
 
-jobs:
-  build:
-    runs-on: windows-latest
+# Collect all source files
+file(GLOB_RECURSE SOURCES
+    ${PROJECT_SOURCE_DIR}/*.cpp
+    ${PROJECT_SOURCE_DIR}/lib/*.cpp
+)
 
-    steps:
-    - name: Checkout Code
-      uses: actions/checkout@v3
+# Add executable
+add_executable(ZuppiCalling ${SOURCES})
 
-    - name: Set Up CMake
-      uses: lukka/get-cmake@v3
+# Include directories
+include_directories(
+    ${PROJECT_SOURCE_DIR}/lib
+    ${PROJECT_SOURCE_DIR}/include
+    ${PROJECT_SOURCE_DIR}
+)
 
-    - name: Install Dependencies
-      run: |
-        choco install -y visualstudio2022buildtools
-        choco install -y visualstudio2022-workload-vctools
-        choco install -y git cmake ninja
+# Define macros
+add_definitions(-D_AFXDLL -D_CRT_SECURE_NO_WARNINGS)
 
-    - name: Install PJSIP
-      run: |
-        git clone https://github.com/pjsip/pjproject.git
-        cd pjproject
-        ./configure --enable-shared
-        cmake . -B build
-        cmake --build build --config Release
-        cmake --install build --prefix /pjsip/install
-
-    - name: Build Project
-      run: |
-        mkdir build
-        cd build
-        cmake -A x64 -DPJSIP_INCLUDE_DIR=/pjsip/install/include -DPJSIP_LIBRARY=/pjsip/install/lib .. 
-        cmake --build . --config Release
-
-    - name: Upload Executable
-      uses: actions/upload-artifact@v3
-      with:
-        name: ZuppiCalling-Executable
-        path: build/Release/ZuppiCalling.exe
+# Link libraries
+target_link_libraries(ZuppiCalling
+    ws2_32
+    winmm
+    mfc
+    pjsua
+    pjlib
+)
