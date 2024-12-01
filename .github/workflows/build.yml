@@ -13,23 +13,23 @@ jobs:
     - name: Checkout Code
       uses: actions/checkout@v3
 
-    - name: Install MSYS2 and Tools
+    - name: Install MSYS2
       run: |
         choco install -y msys2
-        refreshenv
-
-    - name: Add MSYS2 to PATH
-      run: |
+        echo "Adding MSYS2 paths to the environment."
         echo "C:\\tools\\msys64\\usr\\bin" >> $GITHUB_ENV
         echo "C:\\tools\\msys64\\mingw64\\bin" >> $GITHUB_ENV
         echo "C:\\tools\\msys64\\mingw32\\bin" >> $GITHUB_ENV
         echo "C:\\tools\\msys64\\ucrt64\\bin" >> $GITHUB_ENV
+        echo "PATH updated with MSYS2 paths."
 
-    - name: Initialize MSYS2 Environment
+    - name: Initialize MSYS2
       shell: bash
       run: |
-        C:\\tools\\msys64\\usr\\bin\\bash -c "pacman --noconfirm -Syu"
-        C:\\tools\\msys64\\usr\\bin\\bash -c "pacman --noconfirm -S base-devel mingw-w64-x86_64-toolchain"
+        echo "Starting MSYS2 initialization."
+        pacman --noconfirm -Syuu
+        pacman --noconfirm -S base-devel mingw-w64-x86_64-toolchain
+        echo "MSYS2 initialization completed."
 
     - name: Clone and Build PJSIP
       shell: bash
@@ -47,7 +47,7 @@ jobs:
       run: |
         git clone https://github.com/nlohmann/json.git lib/json
 
-    - name: Build Project
+    - name: Build ZuppiCalling
       run: |
         mkdir build
         cd build
