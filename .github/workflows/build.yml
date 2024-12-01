@@ -18,14 +18,17 @@ jobs:
         choco install -y cmake
         choco install -y visualstudio2022buildtools
         choco install -y visualstudio2022-workload-vctools
+        choco install -y msys2
+        refreshenv
+        pacman -S --noconfirm base-devel mingw-w64-x86_64-toolchain
 
     - name: Install PJSIP
       run: |
         git clone https://github.com/pjsip/pjproject.git
         cd pjproject
-        cmake . -B build -DCMAKE_INSTALL_PREFIX=./install
-        cmake --build build --config Release
-        cmake --install build
+        ./configure --prefix=$(pwd)/install
+        make
+        make install
 
     - name: Install JSON Library
       run: |
