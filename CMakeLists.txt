@@ -1,32 +1,38 @@
-cmake_minimum_required(VERSION 3.10)
+name: Build MicroSIP Executable
 
-# Set the project name
-project(ZuppiCalling)
+on:
+  push:
+    branches:
+      - main
 
-# Collect all source files
-file(GLOB_RECURSE SOURCES
-    ${PROJECT_SOURCE_DIR}/*.cpp
-    ${PROJECT_SOURCE_DIR}/lib/*.cpp
-)
+jobs:
+  build:
+    runs-on: ubuntu-latest
 
-# Add executable
-add_executable(ZuppiCalling ${SOURCES})
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v3
 
-# Include directories
-include_directories(
-    ${PROJECT_SOURCE_DIR}/lib
-    ${PROJECT_SOURCE_DIR}/include
-    ${PROJECT_SOURCE_DIR}
-)
+    - name: Install Dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y build-essential cmake libssl-dev
+        # Install PJSIP
+        git clone https://github.com/pjsip/pjproject.git
+        cd pjproject
+        ./configure
+        make
+        sudo make install
 
-# Define macros
-add_definitions(-D_AFXDLL -D_CRT_SECURE_NO_WARNINGS)
+    - name: Build Project
+      run: |
+        mkdir build
+        cd build
+        cmake ..
+        cmake --build . --config Release
 
-# Link libraries
-target_link_libraries(ZuppiCalling
-    ws2_32
-    winmm
-    mfc
-    pjsua
-    pjlib
-)
+    - name: Upload Executable
+      uses: actions/upload-artifact@v3
+      with:
+        name: ZuppiCalling-Executable
+        path: build/Release/ZuppiCalling.exe
