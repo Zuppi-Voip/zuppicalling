@@ -13,8 +13,10 @@ jobs:
     - name: Checkout Code
       uses: actions/checkout@v3
 
-    - name: Install MSYS2
-      run: choco install -y msys2
+    - name: Install MSYS2 and Tools
+      run: |
+        choco install -y msys2
+        refreshenv
 
     - name: Add MSYS2 to PATH
       shell: bash
@@ -26,17 +28,17 @@ jobs:
     - name: Initialize MSYS2
       shell: bash
       run: |
-        export PATH=/c/tools/msys64/usr/bin:/c/tools/msys64/mingw64/bin:$PATH
         pacman -Syu --noconfirm
         pacman -S --noconfirm base-devel mingw-w64-x86_64-toolchain
 
-    - name: Install PJSIP
+    - name: Clone and Build PJSIP
       shell: bash
       run: |
         git clone https://github.com/pjsip/pjproject.git
         cd pjproject
         curl -o config.guess http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.guess;hb=HEAD
         curl -o config.sub http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.sub;hb=HEAD
+        chmod +x config.guess config.sub
         ./configure --prefix=$(pwd)/install
         make
         make install
