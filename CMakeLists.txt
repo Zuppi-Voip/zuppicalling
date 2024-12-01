@@ -16,9 +16,12 @@ include_directories(
     ${PROJECT_SOURCE_DIR}
 )
 
+# Define preprocessor macros
+add_definitions(-D_AFXDLL)
+
 # Link required libraries
 target_link_libraries(ZuppiCalling
     ws2_32
     winmm
-    # Add other libraries if needed
+    mfc
 )
