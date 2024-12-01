@@ -1,4 +1,4 @@
-name: Build MicroSIP Executable
+name: Build ZuppiCalling
 
 on:
   push:
@@ -13,25 +13,35 @@ jobs:
     - name: Checkout Code
       uses: actions/checkout@v3
 
+    - name: Set Up CMake
+      uses: lukka/get-cmake@v3
+
     - name: Install Dependencies
       run: |
-        choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System'
-        choco install mingw
+        choco install -y visualstudio2022buildtools
+        choco install -y visualstudio2022-workload-vctools
 
-    - name: Download Windows SDK
+    - name: Install PJSIP
       run: |
-        Invoke-WebRequest -Uri https://go.microsoft.com/fwlink/?linkid=2120843 -OutFile windows-sdk-installer.exe
-        .\windows-sdk-installer.exe /quiet /norestart
+        git clone https://github.com/pjsip/pjproject.git
+        cd pjproject
+        cmake . -B build -DCMAKE_INSTALL_PREFIX=./install
+        cmake --build build --config Release
+        cmake --install build
 
-    - name: Configure and Build
+    - name: Install JSON Library
+      run: |
+        git clone https://github.com/nlohmann/json.git lib/json
+
+    - name: Build Project
       run: |
         mkdir build
         cd build
-        cmake ..
+        cmake -A x64 -DPJSIP_INCLUDE_DIR=../pjproject/install/include -DPJSIP_LIBRARY=../pjproject/install/lib ..
         cmake --build . --config Release
 
     - name: Upload Executable
       uses: actions/upload-artifact@v3
       with:
-        name: MicroSIP-Executable
-        path: build/Release/MicroSIP.exe
+        name: ZuppiCalling-Executable
+        path: build/Release/ZuppiCalling.exe
