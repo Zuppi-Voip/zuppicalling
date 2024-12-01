@@ -19,16 +19,17 @@ jobs:
         choco install -y visualstudio2022buildtools
         choco install -y visualstudio2022-workload-vctools
         choco install -y msys2
-        refreshenv
-        pacman -S --noconfirm base-devel mingw-w64-x86_64-toolchain
+        set PATH=C:\tools\msys64\usr\bin;C:\tools\msys64\mingw64\bin;%PATH%
+        C:\tools\msys64\usr\bin\bash -lc "pacman -S --noconfirm base-devel mingw-w64-x86_64-toolchain"
 
     - name: Install PJSIP
       run: |
-        git clone https://github.com/pjsip/pjproject.git
-        cd pjproject
-        ./configure --prefix=$(pwd)/install
-        make
-        make install
+        C:\tools\msys64\usr\bin\bash -lc "
+        git clone https://github.com/pjsip/pjproject.git &&
+        cd pjproject &&
+        ./configure --prefix=$(pwd)/install &&
+        make &&
+        make install"
 
     - name: Install JSON Library
       run: |
