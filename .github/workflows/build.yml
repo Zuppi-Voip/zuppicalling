@@ -14,27 +14,29 @@ jobs:
       uses: actions/checkout@v3
 
     - name: Install MSYS2
-      run: |
-        choco install -y msys2
+      run: choco install -y msys2
 
-    - name: Update PATH for MSYS2
+    - name: Add MSYS2 to PATH
+      shell: bash
       run: |
         echo "C:\\tools\\msys64\\usr\\bin" >> $GITHUB_PATH
         echo "C:\\tools\\msys64\\mingw64\\bin" >> $GITHUB_PATH
+        echo "C:\\tools\\msys64\\mingw32\\bin" >> $GITHUB_PATH
 
-    - name: Install Dependencies with pacman
+    - name: Initialize MSYS2
       shell: bash
       run: |
+        export PATH=/c/tools/msys64/usr/bin:/c/tools/msys64/mingw64/bin:$PATH
         pacman -Syu --noconfirm
         pacman -S --noconfirm base-devel mingw-w64-x86_64-toolchain
 
     - name: Install PJSIP
       shell: bash
       run: |
-        git clone https://github.com/pjsip/pjproject.git &&
-        cd pjproject &&
-        ./configure --prefix=$(pwd)/install &&
-        make &&
+        git clone https://github.com/pjsip/pjproject.git
+        cd pjproject
+        ./configure --prefix=$(pwd)/install
+        make
         make install
 
     - name: Install JSON Library
