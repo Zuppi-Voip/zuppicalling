@@ -13,11 +13,9 @@ jobs:
     - name: Checkout Code
       uses: actions/checkout@v3
 
-    - name: Set Up CMake
-      uses: lukka/get-cmake@v3
-
     - name: Install Dependencies
       run: |
+        choco install -y cmake
         choco install -y visualstudio2022buildtools
         choco install -y visualstudio2022-workload-vctools
 
