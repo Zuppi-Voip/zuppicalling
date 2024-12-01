@@ -35,6 +35,8 @@ jobs:
       run: |
         git clone https://github.com/pjsip/pjproject.git
         cd pjproject
+        curl -o config.guess http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.guess;hb=HEAD
+        curl -o config.sub http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.sub;hb=HEAD
         ./configure --prefix=$(pwd)/install
         make
         make install
