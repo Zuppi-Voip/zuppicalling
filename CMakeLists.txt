@@ -3,20 +3,22 @@ cmake_minimum_required(VERSION 3.10)
 # Set the project name
 project(ZuppiCalling)
 
-# Add executable target
-add_executable(ZuppiCalling
-    src/main.cpp  # Replace with actual source files
-    src/other_file.cpp  # Add all relevant .cpp files
+# Collect all .cpp files in the current directory
+file(GLOB_RECURSE SOURCES
+    ${PROJECT_SOURCE_DIR}/*.cpp
 )
+
+# Add the executable
+add_executable(ZuppiCalling ${SOURCES})
 
 # Include directories
 include_directories(
-    ${PROJECT_SOURCE_DIR}/include
+    ${PROJECT_SOURCE_DIR}
 )
 
-# Link any required libraries
+# Link required libraries
 target_link_libraries(ZuppiCalling
     ws2_32
     winmm
-    # Add other required libraries here
+    # Add other libraries if needed
 )
