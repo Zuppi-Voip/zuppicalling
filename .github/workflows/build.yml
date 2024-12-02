@@ -18,13 +18,15 @@ jobs:
         choco install -y msys2
         echo "C:\tools\msys64\usr\bin" >> $GITHUB_ENV
         echo "C:\tools\msys64\mingw64\bin" >> $GITHUB_ENV
+        echo "C:\tools\msys64\mingw32\bin" >> $GITHUB_ENV
 
     - name: Update MSYS2 and Install Dependencies
       shell: bash
       run: |
-        export PATH=/c/tools/msys64/usr/bin:/c/tools/msys64/mingw64/bin:$PATH
+        export PATH=/c/tools/msys64/usr/bin:/c/tools/msys64/mingw64/bin:/c/tools/msys64/mingw32/bin:$PATH
         pacman --noconfirm -Syuu
-        pacman --noconfirm -S base-devel mingw-w64-x86_64-toolchain mingw-w64-x86_64-speex mingw-w64-x86_64-libsrtp mingw-w64-x86_64-libmangle mingw-w64-x86_64-pkgconf
+        pacman --noconfirm -S base-devel mingw-w64-x86_64-toolchain mingw-w64-x86_64-speex \
+            mingw-w64-x86_64-libsrtp mingw-w64-x86_64-libwinpthread mingw-w64-x86_64-libmangle
 
     - name: Clone and Configure PJSIP
       shell: bash
@@ -35,16 +37,17 @@ jobs:
         curl -o config.sub https://git.savannah.gnu.org/cgit/config.git/plain/config.sub
         ./configure --host=x86_64-w64-mingw32 --build=x86_64-w64-mingw32 --prefix=$(pwd)/install \
             --disable-samples \
-            CFLAGS="-I/mingw64/include -I$(pwd)/pjlib/include -I$(pwd)/pjmedia/include" \
-            LDFLAGS="-L/mingw64/lib -L$(pwd)/pjlib/lib -L$(pwd)/pjmedia/lib"
+            CFLAGS="-I/mingw64/include" \
+            LDFLAGS="-L/mingw64/lib"
 
     - name: Build PJSIP
       shell: bash
       run: |
         cd pjproject
-        make -j$(nproc) V=1 && make install
+        make -j$(nproc) V=1 || (cat config.log && exit 1)
+        make install
 
-    - name: Configure and Build ZuppiCalling
+    - name: Build ZuppiCalling
       run: |
         mkdir build
         cd build
