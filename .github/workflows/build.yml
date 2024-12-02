@@ -24,17 +24,18 @@ jobs:
       shell: bash
       run: |
         pacman --noconfirm -Syuu || true
-        pacman --noconfirm -S base-devel mingw-w64-x86_64-toolchain
+        pacman --noconfirm -S base-devel mingw-w64-x86_64-toolchain mingw-w64-x86_64-speex
 
     - name: Build PJSIP
       shell: bash
       run: |
         git clone https://github.com/pjsip/pjproject.git
         cd pjproject
-        curl -L -o config.guess https://git.savannah.gnu.org/cgit/config.git/plain/config.guess
-        curl -L -o config.sub https://git.savannah.gnu.org/cgit/config.git/plain/config.sub
-        ./configure --host=x86_64-w64-mingw32 --prefix=$(pwd)/install --disable-samples
-        make CFLAGS="-O2 -DWIN32 -D_WIN32_WINNT=0x0601 -DWINVER=0x0601" && make install
+        ./configure --host=x86_64-w64-mingw32 --prefix=$(pwd)/install \
+            --disable-samples \
+            CFLAGS="-I/mingw64/include" \
+            LDFLAGS="-L/mingw64/lib"
+        make && make install
 
     - name: Install JSON Library
       run: |
