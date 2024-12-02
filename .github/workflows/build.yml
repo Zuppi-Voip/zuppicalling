@@ -20,11 +20,7 @@ jobs:
         echo "C:\tools\msys64\mingw64\bin" >> $env:GITHUB_PATH
         echo "C:\tools\msys64\mingw32\bin" >> $env:GITHUB_PATH
 
-    - name: Restart Shell
-      run: |
-        echo "Restarting shell to reload environment variables."
-
-    - name: Update MSYS2 and Install Dependencies
+    - name: Update MSYS2
       shell: bash
       run: |
         pacman --noconfirm -Syuu || true
@@ -37,8 +33,8 @@ jobs:
         cd pjproject
         curl -L -o config.guess https://git.savannah.gnu.org/cgit/config.git/plain/config.guess
         curl -L -o config.sub https://git.savannah.gnu.org/cgit/config.git/plain/config.sub
-        ./configure --prefix=$(pwd)/install --disable-samples
-        make && make install
+        ./configure --host=x86_64-w64-mingw32 --prefix=$(pwd)/install --disable-samples
+        make CFLAGS="-O2 -DWIN32 -D_WIN32_WINNT=0x0601 -DWINVER=0x0601" && make install
 
     - name: Install JSON Library
       run: |
