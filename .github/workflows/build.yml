@@ -18,15 +18,14 @@ jobs:
         choco install -y msys2
         echo "C:\tools\msys64\usr\bin" >> $GITHUB_ENV
         echo "C:\tools\msys64\mingw64\bin" >> $GITHUB_ENV
-        echo "C:\tools\msys64\mingw32\bin" >> $GITHUB_ENV
 
     - name: Update MSYS2 and Install Dependencies
       shell: bash
       run: |
-        export PATH=/c/tools/msys64/usr/bin:/c/tools/msys64/mingw64/bin:/c/tools/msys64/mingw32/bin:$PATH
+        export PATH=/c/tools/msys64/usr/bin:/c/tools/msys64/mingw64/bin:$PATH
         pacman --noconfirm -Syuu
-        pacman --noconfirm -S base-devel mingw-w64-x86_64-toolchain mingw-w64-x86_64-speex \
-            mingw-w64-x86_64-libsrtp mingw-w64-x86_64-libwinpthread mingw-w64-x86_64-libmangle
+        pacman --noconfirm -S base-devel mingw-w64-x86_64-toolchain \
+            mingw-w64-x86_64-speex mingw-w64-x86_64-libsrtp mingw-w64-x86_64-libwinpthread
 
     - name: Clone and Configure PJSIP
       shell: bash
@@ -35,10 +34,11 @@ jobs:
         cd pjproject
         curl -o config.guess https://git.savannah.gnu.org/cgit/config.git/plain/config.guess
         curl -o config.sub https://git.savannah.gnu.org/cgit/config.git/plain/config.sub
-        ./configure --host=x86_64-w64-mingw32 --build=x86_64-w64-mingw32 --prefix=$(pwd)/install \
-            --disable-samples \
-            CFLAGS="-I/mingw64/include" \
-            LDFLAGS="-L/mingw64/lib"
+        ./aconfigure \
+          --host=x86_64-w64-mingw32 --build=x86_64-w64-mingw32 --prefix=$(pwd)/install \
+          --disable-samples \
+          CFLAGS="-DPJ_THREAD_SET_STACK_SIZE=0 -DPJ_THREAD_ALLOCATE_STACK=0 -DPJ_BLOCKING_ERROR_VAL=WSAEWOULDBLOCK -DPJ_BLOCKING_CONNECT_ERROR_VAL=WSAEWOULDBLOCK" \
+          LDFLAGS="-L/mingw64/lib"
 
     - name: Build PJSIP
       shell: bash
