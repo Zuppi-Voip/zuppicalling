@@ -1,4 +1,4 @@
-name: Build ZuppiCalling
+name: Build ZuppiCalling Executable
 
 on:
   push:
@@ -10,44 +10,50 @@ jobs:
     runs-on: windows-latest
 
     steps:
+    # Step 1: Check out the repository
     - name: Checkout Code
       uses: actions/checkout@v3
 
-    - name: Install MSYS2
+    # Step 2: Install dependencies
+    - name: Install Dependencies
       run: |
+        choco install -y mingw
         choco install -y msys2
-        echo "C:\tools\msys64\usr\bin" >> $env:GITHUB_PATH
-        echo "C:\tools\msys64\mingw64\bin" >> $env:GITHUB_PATH
-        echo "C:\tools\msys64\mingw32\bin" >> $env:GITHUB_PATH
+        refreshenv
+        echo "Dependencies installed."
 
-    - name: Update MSYS2
-      shell: bash
+    # Step 3: Update the PATH
+    - name: Update PATH for MSYS2
       run: |
-        pacman --noconfirm -Syuu || true
-        pacman --noconfirm -S base-devel mingw-w64-x86_64-toolchain mingw-w64-x86_64-speex
+        setx PATH "%PATH%;C:\tools\msys64\usr\bin;C:\tools\msys64\mingw64\bin"
 
+    # Step 4: Clone and prepare PJSIP
+    - name: Prepare PJSIP
+      run: |
+        git clone https://github.com/pjsip/pjproject.git
+        wget -O pjproject/config.guess http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.guess;hb=HEAD
+        wget -O pjproject/config.sub http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.sub;hb=HEAD
+
+    # Step 5: Build PJSIP
     - name: Build PJSIP
       shell: bash
       run: |
-        git clone https://github.com/pjsip/pjproject.git
         cd pjproject
-        ./configure --host=x86_64-w64-mingw32 --prefix=$(pwd)/install \
+        ./configure --host=x86_64-w64-mingw32 --build=x86_64-w64-mingw32 --prefix=$(pwd)/install \
             --disable-samples \
             CFLAGS="-I/mingw64/include" \
             LDFLAGS="-L/mingw64/lib"
         make && make install
 
-    - name: Install JSON Library
-      run: |
-        git clone https://github.com/nlohmann/json.git lib/json
-
-    - name: Build ZuppiCalling
+    # Step 6: Configure and Build ZuppiCalling
+    - name: Configure and Build ZuppiCalling
       run: |
         mkdir build
         cd build
         cmake -A x64 -DPJSIP_INCLUDE_DIR=../pjproject/install/include -DPJSIP_LIBRARY=../pjproject/install/lib ..
         cmake --build . --config Release
 
+    # Step 7: Upload Built Executable
     - name: Upload Executable
       uses: actions/upload-artifact@v3
       with:
