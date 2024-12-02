@@ -16,26 +16,21 @@ jobs:
     - name: Install MSYS2 and Dependencies
       run: |
         choco install -y msys2
-        echo "C:\\tools\\msys64\\usr\\bin" >> $GITHUB_ENV
-        echo "C:\\tools\\msys64\\mingw64\\bin" >> $GITHUB_ENV
-        echo "C:\\tools\\msys64\\mingw32\\bin" >> $GITHUB_ENV
-        echo "C:\\tools\\msys64\\ucrt64\\bin" >> $GITHUB_ENV
-        echo "C:\\tools\\msys64\\clang64\\bin" >> $GITHUB_ENV
-        export PATH="/c/tools/msys64/usr/bin:/c/tools/msys64/mingw64/bin:/c/tools/msys64/mingw32/bin:$PATH"
-        pacman --noconfirm -Syuu
-        pacman --noconfirm -S base-devel mingw-w64-x86_64-toolchain
+        echo "C:\tools\msys64\usr\bin" >> $env:GITHUB_PATH
+        echo "C:\tools\msys64\mingw64\bin" >> $env:GITHUB_PATH
+        echo "C:\tools\msys64\mingw32\bin" >> $env:GITHUB_PATH
+        echo "C:\tools\msys64\ucrt64\bin" >> $env:GITHUB_PATH
+        echo "C:\tools\msys64\clang64\bin" >> $env:GITHUB_PATH
+        refreshenv
+        C:\tools\msys64\usr\bin\bash -c "pacman --noconfirm -Syuu && pacman --noconfirm -S base-devel mingw-w64-x86_64-toolchain"
 
     - name: Build PJSIP
-      shell: bash
       run: |
         git clone https://github.com/pjsip/pjproject.git
         cd pjproject
         curl -L -o config.guess https://git.savannah.gnu.org/cgit/config.git/plain/config.guess
         curl -L -o config.sub https://git.savannah.gnu.org/cgit/config.git/plain/config.sub
-        chmod +x config.guess config.sub
-        ./configure --prefix=$(pwd)/install --disable-samples
-        make
-        make install
+        C:\tools\msys64\usr\bin\bash -c "./configure --prefix=$(pwd)/install --disable-samples && make && make install"
 
     - name: Install JSON Library
       run: |
