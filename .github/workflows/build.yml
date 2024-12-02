@@ -14,25 +14,25 @@ jobs:
     - name: Checkout Code
       uses: actions/checkout@v3
 
-    # Step 2: Install dependencies
+    # Step 2: Install dependencies with Chocolatey
     - name: Install Dependencies
       run: |
         choco install -y mingw
         choco install -y msys2
-        refreshenv
-        echo "Dependencies installed."
 
-    # Step 3: Update the PATH
-    - name: Update PATH for MSYS2
+    # Step 3: Update PATH manually
+    - name: Update PATH for MSYS2 and MinGW
+      shell: cmd
       run: |
         setx PATH "%PATH%;C:\tools\msys64\usr\bin;C:\tools\msys64\mingw64\bin"
 
     # Step 4: Clone and prepare PJSIP
     - name: Prepare PJSIP
+      shell: bash
       run: |
         git clone https://github.com/pjsip/pjproject.git
-        wget -O pjproject/config.guess http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.guess;hb=HEAD
-        wget -O pjproject/config.sub http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.sub;hb=HEAD
+        curl -o pjproject/config.guess http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.guess;hb=HEAD
+        curl -o pjproject/config.sub http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.sub;hb=HEAD
 
     # Step 5: Build PJSIP
     - name: Build PJSIP
