@@ -13,7 +13,7 @@ jobs:
     - name: Checkout Code
       uses: actions/checkout@v3
 
-    - name: Install MSYS2
+    - name: Install MSYS2 and Dependencies
       run: |
         choco install -y msys2
         echo "C:\\tools\\msys64\\usr\\bin" >> $GITHUB_ENV
@@ -21,10 +21,6 @@ jobs:
         echo "C:\\tools\\msys64\\mingw32\\bin" >> $GITHUB_ENV
         echo "C:\\tools\\msys64\\ucrt64\\bin" >> $GITHUB_ENV
         echo "C:\\tools\\msys64\\clang64\\bin" >> $GITHUB_ENV
-
-    - name: Initialize MSYS2
-      shell: bash
-      run: |
         export PATH="/c/tools/msys64/usr/bin:/c/tools/msys64/mingw64/bin:/c/tools/msys64/mingw32/bin:$PATH"
         pacman --noconfirm -Syuu
         pacman --noconfirm -S base-devel mingw-w64-x86_64-toolchain
