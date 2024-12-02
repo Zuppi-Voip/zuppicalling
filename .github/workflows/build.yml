@@ -19,16 +19,21 @@ jobs:
       run: |
         choco install -y mingw
         choco install -y msys2
-        echo "::set-env name=PATH::C:\tools\msys64\usr\bin;C:\tools\msys64\mingw64\bin;$env:PATH"
 
-    # Step 3: Update MSYS2 Configuration
+    # Step 3: Update PATH using Environment Files
+    - name: Update PATH
+      run: |
+        echo "C:\tools\msys64\usr\bin" >> $GITHUB_ENV
+        echo "C:\tools\msys64\mingw64\bin" >> $GITHUB_ENV
+
+    # Step 4: Update MSYS2 Configuration
     - name: Configure MSYS2
       shell: bash
       run: |
         pacman --noconfirm -Syu
         pacman --noconfirm -S base-devel mingw-w64-x86_64-toolchain
 
-    # Step 4: Clone and Update PJSIP
+    # Step 5: Clone and Update PJSIP
     - name: Clone and Update PJSIP
       shell: bash
       run: |
@@ -37,7 +42,7 @@ jobs:
         curl -o config.guess https://git.savannah.gnu.org/cgit/config.git/plain/config.guess
         curl -o config.sub https://git.savannah.gnu.org/cgit/config.git/plain/config.sub
 
-    # Step 5: Build PJSIP without Samples
+    # Step 6: Build PJSIP without Samples
     - name: Build PJSIP
       shell: bash
       run: |
@@ -48,7 +53,7 @@ jobs:
             LDFLAGS="-L/mingw64/lib"
         make && make install
 
-    # Step 6: Configure and Build ZuppiCalling
+    # Step 7: Configure and Build ZuppiCalling
     - name: Configure and Build ZuppiCalling
       run: |
         mkdir build
@@ -56,7 +61,7 @@ jobs:
         cmake -A x64 -DPJSIP_INCLUDE_DIR=../pjproject/install/include -DPJSIP_LIBRARY=../pjproject/install/lib ..
         cmake --build . --config Release
 
-    # Step 7: Upload Built Executable
+    # Step 8: Upload Built Executable
     - name: Upload Executable
       uses: actions/upload-artifact@v3
       with:
