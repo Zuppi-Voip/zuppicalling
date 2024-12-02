@@ -16,10 +16,13 @@ jobs:
     - name: Install MSYS2
       run: |
         choco install -y msys2
-        echo "::add-path::C:\\tools\\msys64\\usr\\bin" >> $env:GITHUB_PATH
-        echo "::add-path::C:\\tools\\msys64\\mingw64\\bin" >> $env:GITHUB_PATH
-        echo "::add-path::C:\\tools\\msys64\\mingw32\\bin" >> $env:GITHUB_PATH
-        echo "::add-path::C:\\tools\\msys64\\clang64\\bin" >> $env:GITHUB_PATH
+        echo "C:\tools\msys64\usr\bin" >> $env:GITHUB_PATH
+        echo "C:\tools\msys64\mingw64\bin" >> $env:GITHUB_PATH
+        echo "C:\tools\msys64\mingw32\bin" >> $env:GITHUB_PATH
+
+    - name: Restart Shell
+      run: |
+        echo "Restarting shell to reload environment variables."
 
     - name: Update MSYS2 and Install Dependencies
       shell: bash
