@@ -10,36 +10,30 @@ jobs:
     runs-on: windows-latest
 
     steps:
-    # Step 1: Checkout Code
+    # Step 1: Checkout the repository
     - name: Checkout Code
       uses: actions/checkout@v3
 
-    # Step 2: Install Chocolatey and MSYS2
-    - name: Install Chocolatey and MSYS2
+    # Step 2: Install MSYS2 using Chocolatey
+    - name: Install MSYS2 via Chocolatey
       run: |
         choco install -y msys2
-        refreshenv
 
-    # Step 3: Add MSYS2 to PATH
-    - name: Configure MSYS2 PATH
+    # Step 3: Manually Add MSYS2 Paths to the Environment
+    - name: Add MSYS2 Paths to Environment
       run: |
-        echo "C:\tools\msys64\usr\bin" >> $GITHUB_ENV
-        echo "C:\tools\msys64\mingw64\bin" >> $GITHUB_ENV
+        echo "C:\\tools\\msys64\\usr\\bin" >> $GITHUB_ENV
+        echo "C:\\tools\\msys64\\mingw64\\bin" >> $GITHUB_ENV
 
-    # Step 4: Update MSYS2 Packages
-    - name: Update MSYS2 Packages
+    # Step 4: Update MSYS2 and Install Build Dependencies
+    - name: Update MSYS2 and Install Dependencies
       shell: bash
       run: |
         export PATH=/c/tools/msys64/usr/bin:/c/tools/msys64/mingw64/bin:$PATH
         pacman --noconfirm -Syuu
-
-    # Step 5: Install Build Dependencies
-    - name: Install Dependencies
-      shell: bash
-      run: |
         pacman --noconfirm -S base-devel mingw-w64-x86_64-toolchain
 
-    # Step 6: Clone and Configure PJSIP
+    # Step 5: Clone PJSIP Repository and Update Config Files
     - name: Clone and Configure PJSIP
       shell: bash
       run: |
@@ -48,7 +42,7 @@ jobs:
         curl -o config.guess https://git.savannah.gnu.org/cgit/config.git/plain/config.guess
         curl -o config.sub https://git.savannah.gnu.org/cgit/config.git/plain/config.sub
 
-    # Step 7: Build PJSIP
+    # Step 6: Build PJSIP
     - name: Build PJSIP
       shell: bash
       run: |
@@ -57,9 +51,9 @@ jobs:
             --disable-samples \
             CFLAGS="-I/mingw64/include" \
             LDFLAGS="-L/mingw64/lib"
-        make && make install
+        make -j$(nproc) && make install
 
-    # Step 8: Configure and Build ZuppiCalling
+    # Step 7: Configure and Build ZuppiCalling
     - name: Configure and Build ZuppiCalling
       run: |
         mkdir build
@@ -67,7 +61,7 @@ jobs:
         cmake -A x64 -DPJSIP_INCLUDE_DIR=../pjproject/install/include -DPJSIP_LIBRARY=../pjproject/install/lib ..
         cmake --build . --config Release
 
-    # Step 9: Upload Built Executable
+    # Step 8: Upload Built Executable
     - name: Upload Executable
       uses: actions/upload-artifact@v3
       with:
