@@ -19,11 +19,12 @@ jobs:
       run: |
         choco install -y mingw
         choco install -y msys2
+        refreshenv
 
     # Step 3: Update PATH for MSYS2 and MinGW
     - name: Update PATH
       run: |
-        echo "C:\tools\msys64\usr\bin;C:\tools\msys64\mingw64\bin;%PATH%" > $env:GITHUB_PATH
+        echo "C:\tools\msys64\usr\bin;C:\tools\msys64\mingw64\bin;%PATH%" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
 
     # Step 4: Clone and Update PJSIP
     - name: Clone and Update PJSIP
