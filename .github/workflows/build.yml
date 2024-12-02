@@ -19,10 +19,12 @@ jobs:
         echo "C:\tools\msys64\usr\bin" >> $env:GITHUB_PATH
         echo "C:\tools\msys64\mingw64\bin" >> $env:GITHUB_PATH
         echo "C:\tools\msys64\mingw32\bin" >> $env:GITHUB_PATH
-        echo "C:\tools\msys64\ucrt64\bin" >> $env:GITHUB_PATH
-        echo "C:\tools\msys64\clang64\bin" >> $env:GITHUB_PATH
         refreshenv
-        C:\tools\msys64\usr\bin\bash -c "pacman --noconfirm -Syuu && pacman --noconfirm -S base-devel mingw-w64-x86_64-toolchain"
+
+    - name: Update MSYS2 and Install Dependencies
+      run: |
+        C:\tools\msys64\usr\bin\bash -lc "pacman --noconfirm -Syuu"
+        C:\tools\msys64\usr\bin\bash -lc "pacman --noconfirm -S base-devel mingw-w64-x86_64-toolchain"
 
     - name: Build PJSIP
       run: |
@@ -30,7 +32,8 @@ jobs:
         cd pjproject
         curl -L -o config.guess https://git.savannah.gnu.org/cgit/config.git/plain/config.guess
         curl -L -o config.sub https://git.savannah.gnu.org/cgit/config.git/plain/config.sub
-        C:\tools\msys64\usr\bin\bash -c "./configure --prefix=$(pwd)/install --disable-samples && make && make install"
+        C:\tools\msys64\usr\bin\bash -lc "./configure --prefix=$(pwd)/install --disable-samples"
+        C:\tools\msys64\usr\bin\bash -lc "make && make install"
 
     - name: Install JSON Library
       run: |
