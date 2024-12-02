@@ -19,12 +19,14 @@ jobs:
       run: |
         choco install -y mingw
         choco install -y msys2
-        refreshenv
+        echo "::set-env name=PATH::C:\tools\msys64\usr\bin;C:\tools\msys64\mingw64\bin;$env:PATH"
 
-    # Step 3: Update PATH for MSYS2 and MinGW
-    - name: Update PATH
+    # Step 3: Update MSYS2 Configuration
+    - name: Configure MSYS2
+      shell: bash
       run: |
-        echo "C:\tools\msys64\usr\bin;C:\tools\msys64\mingw64\bin;%PATH%" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+        pacman --noconfirm -Syu
+        pacman --noconfirm -S base-devel mingw-w64-x86_64-toolchain
 
     # Step 4: Clone and Update PJSIP
     - name: Clone and Update PJSIP
@@ -35,7 +37,7 @@ jobs:
         curl -o config.guess https://git.savannah.gnu.org/cgit/config.git/plain/config.guess
         curl -o config.sub https://git.savannah.gnu.org/cgit/config.git/plain/config.sub
 
-    # Step 5: Build PJSIP without samples
+    # Step 5: Build PJSIP without Samples
     - name: Build PJSIP
       shell: bash
       run: |
