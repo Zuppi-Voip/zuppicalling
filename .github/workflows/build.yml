@@ -24,7 +24,7 @@ jobs:
       run: |
         export PATH=/c/tools/msys64/usr/bin:/c/tools/msys64/mingw64/bin:$PATH
         pacman --noconfirm -Syuu
-        pacman --noconfirm -S base-devel mingw-w64-x86_64-toolchain mingw-w64-x86_64-libsrtp mingw-w64-x86_64-speex
+        pacman --noconfirm -S base-devel mingw-w64-x86_64-toolchain mingw-w64-x86_64-speex mingw-w64-x86_64-libsrtp mingw-w64-x86_64-libmangle mingw-w64-x86_64-pkgconf
 
     - name: Clone and Configure PJSIP
       shell: bash
