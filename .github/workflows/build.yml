@@ -14,73 +14,56 @@ jobs:
     - name: Checkout Code
       uses: actions/checkout@v3
 
-    # Step 2: Install Chocolatey and MSYS2
-    - name: Install Chocolatey and MSYS2
+    # Step 2: Install Chocolatey and Dependencies
+    - name: Install Chocolatey and Dependencies
       run: |
-        choco install -y msys2
+        choco install -y msys2 visualstudio2022buildtools
         echo "C:\\tools\\msys64\\usr\\bin" >> $GITHUB_ENV
         echo "C:\\tools\\msys64\\mingw64\\bin" >> $GITHUB_ENV
+        echo "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\MSBuild\\Current\\Bin" >> $GITHUB_ENV
 
-    # Step 3: Update MSYS2 and Install Dependencies
-    - name: Update MSYS2 and Install Dependencies
+    # Step 3: Update MSYS2 and Install Build Tools
+    - name: Update MSYS2 and Install Build Tools
       shell: bash
       run: |
         export PATH=/c/tools/msys64/usr/bin:/c/tools/msys64/mingw64/bin:$PATH
         pacman --noconfirm -Syuu
-        pacman --noconfirm -S base-devel mingw-w64-x86_64-toolchain \
-            mingw-w64-x86_64-cmake mingw-w64-x86_64-jsoncpp \
-            mingw-w64-x86_64-pkg-config
+        pacman --noconfirm -S base-devel mingw-w64-x86_64-toolchain mingw-w64-x86_64-cmake mingw-w64-x86_64-jsoncpp mingw-w64-x86_64-pkg-config
 
-    # Step 4: Clean Existing PJSIP Directory
-    - name: Clean Existing PJSIP Directory
+    # Step 4: Clean and Clone PJSIP
+    - name: Clean and Clone PJSIP
       shell: bash
       run: |
         if [ -d "pjproject" ]; then rm -rf pjproject; fi
-
-    # Step 5: Clone and Configure PJSIP
-    - name: Clone and Configure PJSIP
-      shell: bash
-      run: |
         git clone https://github.com/pjsip/pjproject.git
         cd pjproject
         curl -o config.guess https://git.savannah.gnu.org/cgit/config.git/plain/config.guess
         curl -o config.sub https://git.savannah.gnu.org/cgit/config.git/plain/config.sub
         echo "#define PJ_HAS_NETINET_IP_H 0" > pjlib/include/pj/config_site.h
         ./aconfigure \
-          --host=x86_64-w64-mingw32 --build=x86_64-w64-mingw32 --prefix=$(pwd)/install \
+          --host=x86_64-w64-mingw32 \
           --disable-video --disable-opus --disable-webrtc --disable-samples --disable-resample \
           --disable-g711 --disable-g7221 --disable-gsm \
-          CFLAGS="-I/mingw64/include -I$(pwd)/pjlib/include" \
-          LDFLAGS="-L/mingw64/lib"
-
-    # Step 6: Build and Install PJSIP
-    - name: Build PJSIP
-      shell: bash
-      run: |
-        cd pjproject
-        make dep || true
-        make || true
+          CFLAGS="-I/mingw64/include" LDFLAGS="-L/mingw64/lib"
+        make dep
+        make
         make install
 
-    # Step 7: Set Environment Variables for PJSIP
-    - name: Set Environment Variables
-      run: |
-        echo "PJSIP_INCLUDE_DIR=$(pwd)/pjproject/install/include" >> $GITHUB_ENV
-        echo "PJSIP_LIBRARY=$(pwd)/pjproject/install/lib" >> $GITHUB_ENV
-
-    # Step 8: Configure and Build ZuppiCalling
+    # Step 5: Configure and Build ZuppiCalling
     - name: Configure and Build ZuppiCalling
       shell: bash
       run: |
         mkdir -p build
         cd build
-        cmake -A x64 \
-          -DPJSIP_INCLUDE_DIR=$PJSIP_INCLUDE_DIR \
-          -DPJSIP_LIBRARY=$PJSIP_LIBRARY \
+        cmake -G "Visual Studio 17 2022" -A x64 \
+          -DPJSIP_INCLUDE_DIR=../pjproject/pjlib/include \
+          -DPJSIP_LIBRARY=../pjproject/pjlib/lib \
+          -DJSONCPP_INCLUDE_DIR=/mingw64/include/jsoncpp \
+          -DJSONCPP_LIBRARY=/mingw64/lib \
           ..
         cmake --build . --config Release
 
-    # Step 9: Upload Built Executable
+    # Step 6: Upload Built Executable
     - name: Upload Executable
       uses: actions/upload-artifact@v3
       with:
