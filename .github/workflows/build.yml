@@ -27,8 +27,9 @@ jobs:
         pacman --noconfirm -S base-devel mingw-w64-x86_64-toolchain \
             mingw-w64-x86_64-speex mingw-w64-x86_64-libsrtp mingw-w64-x86_64-libwinpthread
 
-    - name: Create Custom Configuration
+    - name: Create Directories and Custom Configuration
       run: |
+        mkdir -p pjproject/pjlib/include/pj
         echo "#define PJ_HAS_NETINET_IP_H 0" > pjproject/pjlib/include/pj/config_site.h
         echo "#define PJ_THREAD_SET_STACK_SIZE 0" >> pjproject/pjlib/include/pj/config_site.h
         echo "#define PJ_THREAD_ALLOCATE_STACK 0" >> pjproject/pjlib/include/pj/config_site.h
