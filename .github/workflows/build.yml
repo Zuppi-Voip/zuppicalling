@@ -10,15 +10,18 @@ jobs:
     runs-on: windows-latest
 
     steps:
+    # Step 1: Checkout Code
     - name: Checkout Code
       uses: actions/checkout@v3
 
+    # Step 2: Install Chocolatey and MSYS2
     - name: Install Chocolatey and MSYS2
       run: |
         choco install -y msys2
         echo "C:\tools\msys64\usr\bin" >> $GITHUB_ENV
         echo "C:\tools\msys64\mingw64\bin" >> $GITHUB_ENV
 
+    # Step 3: Update MSYS2 and Install Dependencies
     - name: Update MSYS2 and Install Dependencies
       shell: bash
       run: |
@@ -27,19 +30,13 @@ jobs:
         pacman --noconfirm -S base-devel mingw-w64-x86_64-toolchain \
             mingw-w64-x86_64-speex mingw-w64-x86_64-libsrtp mingw-w64-x86_64-libwinpthread
 
+    # Step 4: Clean Existing PJSIP Directory
     - name: Clean Existing PJSIP Directory
+      shell: bash
       run: |
         if [ -d "pjproject" ]; then rm -rf pjproject; fi
 
-    - name: Create Directories and Custom Configuration
-      run: |
-        mkdir -p pjproject/pjlib/include/pj
-        echo "#define PJ_HAS_NETINET_IP_H 0" > pjproject/pjlib/include/pj/config_site.h
-        echo "#define PJ_THREAD_SET_STACK_SIZE 0" >> pjproject/pjlib/include/pj/config_site.h
-        echo "#define PJ_THREAD_ALLOCATE_STACK 0" >> pjproject/pjlib/include/pj/config_site.h
-        echo "#define PJ_BLOCKING_ERROR_VAL WSAEWOULDBLOCK" >> pjproject/pjlib/include/pj/config_site.h
-        echo "#define PJ_BLOCKING_CONNECT_ERROR_VAL WSAEWOULDBLOCK" >> pjproject/pjlib/include/pj/config_site.h
-
+    # Step 5: Clone and Configure PJSIP
     - name: Clone and Configure PJSIP
       shell: bash
       run: |
@@ -47,26 +44,30 @@ jobs:
         cd pjproject
         curl -o config.guess https://git.savannah.gnu.org/cgit/config.git/plain/config.guess
         curl -o config.sub https://git.savannah.gnu.org/cgit/config.git/plain/config.sub
+        echo "#define PJ_HAS_NETINET_IP_H 0" > pjlib/include/pj/config_site.h
         ./aconfigure \
           --host=x86_64-w64-mingw32 --build=x86_64-w64-mingw32 --prefix=$(pwd)/install \
           CFLAGS="-I/mingw64/include -I$(pwd)/pjlib/include" \
           LDFLAGS="-L/mingw64/lib"
 
-    - name: Build Dependencies and PJSIP
+    # Step 6: Build PJSIP
+    - name: Build PJSIP
       shell: bash
       run: |
         cd pjproject
-        make dep -j$(nproc) || (cat config.log && exit 1)
-        make -j$(nproc) || (cat config.log && exit 1)
+        make dep
+        make
         make install
 
-    - name: Build ZuppiCalling
+    # Step 7: Configure and Build ZuppiCalling
+    - name: Configure and Build ZuppiCalling
       run: |
         mkdir build
         cd build
         cmake -A x64 -DPJSIP_INCLUDE_DIR=../pjproject/install/include -DPJSIP_LIBRARY=../pjproject/install/lib ..
         cmake --build . --config Release
 
+    # Step 8: Upload Built Executable
     - name: Upload Executable
       uses: actions/upload-artifact@v3
       with:
