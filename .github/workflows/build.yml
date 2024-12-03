@@ -28,7 +28,8 @@ jobs:
         export PATH=/c/tools/msys64/usr/bin:/c/tools/msys64/mingw64/bin:$PATH
         pacman --noconfirm -Syuu
         pacman --noconfirm -S base-devel mingw-w64-x86_64-toolchain \
-            mingw-w64-x86_64-cmake mingw-w64-x86_64-jsoncpp
+            mingw-w64-x86_64-cmake mingw-w64-x86_64-jsoncpp \
+            mingw-w64-x86_64-pkg-config
 
     # Step 4: Clean Existing PJSIP Directory
     - name: Clean Existing PJSIP Directory
@@ -52,7 +53,7 @@ jobs:
           CFLAGS="-I/mingw64/include -I$(pwd)/pjlib/include" \
           LDFLAGS="-L/mingw64/lib"
 
-    # Step 6: Build PJSIP Without WebRTC
+    # Step 6: Build and Install PJSIP
     - name: Build PJSIP
       shell: bash
       run: |
@@ -61,19 +62,25 @@ jobs:
         make || true
         make install
 
-    # Step 7: Configure and Build ZuppiCalling
+    # Step 7: Set Environment Variables for PJSIP
+    - name: Set Environment Variables
+      run: |
+        echo "PJSIP_INCLUDE_DIR=$(pwd)/pjproject/install/include" >> $GITHUB_ENV
+        echo "PJSIP_LIBRARY=$(pwd)/pjproject/install/lib" >> $GITHUB_ENV
+
+    # Step 8: Configure and Build ZuppiCalling
     - name: Configure and Build ZuppiCalling
       shell: bash
       run: |
-        mkdir build
+        mkdir -p build
         cd build
         cmake -A x64 \
-          -DPJSIP_INCLUDE_DIR=../pjproject/install/include \
-          -DPJSIP_LIBRARY=../pjproject/install/lib \
+          -DPJSIP_INCLUDE_DIR=$PJSIP_INCLUDE_DIR \
+          -DPJSIP_LIBRARY=$PJSIP_LIBRARY \
           ..
         cmake --build . --config Release
 
-    # Step 8: Upload Built Executable
+    # Step 9: Upload Built Executable
     - name: Upload Executable
       uses: actions/upload-artifact@v3
       with:
