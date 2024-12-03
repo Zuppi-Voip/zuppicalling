@@ -36,15 +36,15 @@ jobs:
         curl -o config.sub https://git.savannah.gnu.org/cgit/config.git/plain/config.sub
         ./aconfigure \
           --host=x86_64-w64-mingw32 --build=x86_64-w64-mingw32 --prefix=$(pwd)/install \
-          --disable-samples \
           CFLAGS="-DPJ_THREAD_SET_STACK_SIZE=0 -DPJ_THREAD_ALLOCATE_STACK=0 -DPJ_BLOCKING_ERROR_VAL=WSAEWOULDBLOCK -DPJ_BLOCKING_CONNECT_ERROR_VAL=WSAEWOULDBLOCK" \
           LDFLAGS="-L/mingw64/lib"
 
-    - name: Build PJSIP
+    - name: Build Dependencies and PJSIP
       shell: bash
       run: |
         cd pjproject
-        make -j$(nproc) V=1 || (cat config.log && exit 1)
+        make dep -j$(nproc) || (cat config.log && exit 1)
+        make -j$(nproc) || (cat config.log && exit 1)
         make install
 
     - name: Build ZuppiCalling
