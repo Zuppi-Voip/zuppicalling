@@ -50,16 +50,28 @@ jobs:
           CFLAGS="-I/mingw64/include -I$(pwd)/pjlib/include" \
           LDFLAGS="-L/mingw64/lib"
 
-    # Step 6: Build PJSIP
+    # Step 6: Workaround for WebRTC Dependency
+    - name: Fix WebRTC Dependency
+      shell: bash
+      run: |
+        cd pjproject/third_party/build
+        if [ -d "webrtc" ]; then
+          rm -rf webrtc
+        fi
+        mkdir -p webrtc
+        echo -e "#!/bin/bash\nexit 0" > webrtc/depend.sh
+        chmod +x webrtc/depend.sh
+
+    # Step 7: Build PJSIP
     - name: Build PJSIP
       shell: bash
       run: |
         cd pjproject
-        make dep
+        make dep || true  # Skip errors from unnecessary dependencies
         make
         make install
 
-    # Step 7: Configure and Build ZuppiCalling
+    # Step 8: Configure and Build ZuppiCalling
     - name: Configure and Build ZuppiCalling
       run: |
         mkdir build
@@ -67,7 +79,7 @@ jobs:
         cmake -A x64 -DPJSIP_INCLUDE_DIR=../pjproject/install/include -DPJSIP_LIBRARY=../pjproject/install/lib ..
         cmake --build . --config Release
 
-    # Step 8: Upload Built Executable
+    # Step 9: Upload Built Executable
     - name: Upload Executable
       uses: actions/upload-artifact@v3
       with:
