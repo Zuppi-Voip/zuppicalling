@@ -47,7 +47,7 @@ jobs:
         echo "#define PJ_HAS_NETINET_IP_H 0" > pjlib/include/pj/config_site.h
         ./aconfigure \
           --host=x86_64-w64-mingw32 --build=x86_64-w64-mingw32 --prefix=$(pwd)/install \
-          --disable-video --disable-opus --disable-webrtc \
+          --disable-video --disable-opus --disable-webrtc --disable-samples \
           CFLAGS="-I/mingw64/include -I$(pwd)/pjlib/include" \
           LDFLAGS="-L/mingw64/lib"
 
