@@ -28,7 +28,7 @@ jobs:
         export PATH=/c/tools/msys64/usr/bin:/c/tools/msys64/mingw64/bin:$PATH
         pacman --noconfirm -Syuu
         pacman --noconfirm -S base-devel mingw-w64-x86_64-toolchain \
-            mingw-w64-x86_64-speex mingw-w64-x86_64-libsrtp mingw-w64-x86_64-libwinpthread
+            mingw-w64-x86_64-cmake mingw-w64-x86_64-jsoncpp
 
     # Step 4: Clean Existing PJSIP Directory
     - name: Clean Existing PJSIP Directory
@@ -57,16 +57,20 @@ jobs:
       shell: bash
       run: |
         cd pjproject
-        make dep || true  # Prevent dependency issues from halting the process
-        make || true      # Allow the build to skip problematic modules
+        make dep || true
+        make || true
         make install
 
     # Step 7: Configure and Build ZuppiCalling
     - name: Configure and Build ZuppiCalling
+      shell: bash
       run: |
         mkdir build
         cd build
-        cmake -A x64 -DPJSIP_INCLUDE_DIR=../pjproject/install/include -DPJSIP_LIBRARY=../pjproject/install/lib ..
+        cmake -A x64 \
+          -DPJSIP_INCLUDE_DIR=../pjproject/install/include \
+          -DPJSIP_LIBRARY=../pjproject/install/lib \
+          ..
         cmake --build . --config Release
 
     # Step 8: Upload Built Executable
