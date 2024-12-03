@@ -27,6 +27,10 @@ jobs:
         pacman --noconfirm -S base-devel mingw-w64-x86_64-toolchain \
             mingw-w64-x86_64-speex mingw-w64-x86_64-libsrtp mingw-w64-x86_64-libwinpthread
 
+    - name: Clean Existing PJSIP Directory
+      run: |
+        if [ -d "pjproject" ]; then rm -rf pjproject; fi
+
     - name: Create Directories and Custom Configuration
       run: |
         mkdir -p pjproject/pjlib/include/pj
